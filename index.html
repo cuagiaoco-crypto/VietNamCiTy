@@ -1,84 +1,290 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>B79 Street Life V7 - Google Map + GPS</title>
-  <style>
-    html,body,#map{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#10141f;overflow:hidden}
-    .hud{position:fixed;left:12px;top:12px;z-index:5;background:rgba(12,18,28,.88);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:12px 14px;box-shadow:0 12px 35px rgba(0,0,0,.25);max-width:360px;backdrop-filter:blur(10px)}
-    .hud h1{font-size:16px;margin:0 0 6px;color:#ffd166}.hud p{margin:4px 0;font-size:13px;line-height:1.35;color:#dfe7ff}.hud b{color:#67e8f9}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    button{border:0;border-radius:12px;padding:9px 11px;font-weight:700;cursor:pointer;background:#ffd166;color:#151515}button.secondary{background:#27364f;color:#fff;border:1px solid rgba(255,255,255,.12)}
-    .bottom{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:5;background:rgba(12,18,28,.86);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:8px 12px;color:#fff;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    .coin{color:#ffd166;font-weight:800}.mission{color:#a7f3d0}.warn{color:#ffb4a2}.avatar{width:54px;height:72px;position:relative;transform:translate(-27px,-64px);filter:drop-shadow(0 10px 8px rgba(0,0,0,.35))}
-    .head{position:absolute;left:13px;top:0;width:28px;height:28px;background:linear-gradient(#ffd0a6,#d9905f);border-radius:50%;border:2px solid #292524}.hair{position:absolute;left:9px;top:-2px;width:36px;height:17px;background:#1f2937;border-radius:20px 20px 8px 8px}.body{position:absolute;left:10px;top:29px;width:34px;height:31px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:14px 14px 10px 10px;border:2px solid #0f172a}.leg1,.leg2{position:absolute;top:58px;width:12px;height:18px;background:#111827;border-radius:8px}.leg1{left:14px}.leg2{right:14px}.face{position:absolute;left:18px;top:11px;color:#111;font-size:12px;font-weight:bold}.pulse{position:absolute;left:-12px;top:42px;width:78px;height:24px;background:rgba(34,197,94,.22);border-radius:50%;animation:pulse 1.3s infinite}@keyframes pulse{0%{transform:scale(.78);opacity:.9}100%{transform:scale(1.2);opacity:0}}
-    .npc{width:34px;height:46px;position:relative;transform:translate(-17px,-42px);filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}.npc:before{content:"";position:absolute;left:8px;top:0;width:18px;height:18px;background:#f2c090;border-radius:50%;border:2px solid #1f2937}.npc:after{content:"";position:absolute;left:5px;top:20px;width:24px;height:24px;background:#ef4444;border-radius:10px;border:2px solid #1f2937}.pinLabel{background:#111827;color:white;padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);font-size:12px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.28)}
-    .panel{position:fixed;right:12px;top:12px;z-index:5;width:300px;background:rgba(255,255,255,.92);border-radius:16px;padding:12px;color:#111827;box-shadow:0 12px 35px rgba(0,0,0,.25)}.panel h2{font-size:15px;margin:0 0 8px}.panel ul{padding-left:18px;margin:8px 0}.panel li{font-size:13px;margin:5px 0}.hide{display:none!important}@media(max-width:720px){.panel{display:none}.hud{max-width:calc(100vw - 48px)}.bottom{width:calc(100vw - 50px);justify-content:center;font-size:13px}}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>B79 Street Life V15 - Vietnam Open World</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#05070b;color:#fff}
+  #game{position:fixed;inset:0}
+  .hud{position:fixed;left:14px;top:14px;z-index:10;background:rgba(0,0,0,.48);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .hud h1{font-size:16px;margin:0 0 6px;color:#ffd76a}
+  .row{font-size:13px;line-height:1.7;color:#e9eef7}
+  .tag{display:inline-block;background:#1d7cff;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:6px}
+  .panel{position:fixed;right:14px;top:14px;z-index:10;width:285px;background:rgba(0,0,0,.50);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:12px;backdrop-filter:blur(12px)}
+  .panel h2{font-size:15px;margin:0 0 8px;color:#7fffd4}
+  .btn{display:inline-block;border:0;border-radius:12px;padding:9px 12px;margin:5px 4px 0 0;background:#1d7cff;color:#fff;font-weight:700;cursor:pointer}
+  .btn.alt{background:#343a46}.btn.buy{background:#12a150}.btn.warn{background:#d78b00}
+  .hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:9px 14px;font-size:13px;color:#fff;white-space:nowrap}
+  #joy{position:fixed;left:22px;bottom:34px;width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);display:none;z-index:12;touch-action:none}
+  #knob{position:absolute;left:44px;top:44px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.75)}
+  .mini{position:fixed;right:16px;bottom:16px;width:160px;height:160px;border-radius:18px;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.15);z-index:11;overflow:hidden}
+  .mini:before{content:"Bản đồ mini";position:absolute;left:10px;top:8px;font-size:11px;color:#ddd;z-index:1}
+  #cross{position:fixed;left:50%;top:50%;width:8px;height:8px;margin-left:-4px;margin-top:-4px;border-radius:50%;background:rgba(255,255,255,.45);z-index:9}
+  @media(max-width:760px){.panel{left:12px;right:12px;top:auto;bottom:175px;width:auto}.hint{bottom:8px;font-size:12px}.hud{font-size:12px}#joy{display:block}.mini{width:120px;height:120px}.btn{padding:8px 10px}}
+</style>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="hud">
-    <h1>B79 Street Life V7</h1>
-    <p>Chế độ: <b>Google Map Việt Nam + GPS người chơi</b></p>
-    <p id="status">Đang chờ tải Google Maps...</p>
-    <div class="row">
-      <button id="locBtn">📍 Lấy vị trí của tôi</button>
-      <button id="missionBtn" class="secondary">📦 Nhận nhiệm vụ</button>
-      <button id="resetBtn" class="secondary">↻ Reset</button>
-    </div>
-  </div>
-  <div class="panel">
-    <h2>Ghi chú V7</h2>
-    <ul>
-      <li>Cần thay <b>YOUR_GOOGLE_MAPS_API_KEY</b> bằng API key thật.</li>
-      <li>GPS chỉ chạy trên HTTPS hoặc localhost.</li>
-      <li>Không lưu vị trí lên server, chỉ chạy trên máy người chơi.</li>
-      <li>Nhân vật AI/5D hiện là demo sprite nâng cấp, có thể thay bằng model thật sau.</li>
-    </ul>
-  </div>
-  <div class="bottom"><span>💰 <span id="money" class="coin">0</span> VND game</span><span>|</span><span id="mission" class="mission">Chưa có nhiệm vụ</span></div>
+<div id="game"></div>
+<div id="cross"></div>
+<div class="hud">
+  <h1>B79 Street Life <span class="tag">V15</span></h1>
+  <div class="row">💰 Ví: <b id="money">0</b> VND</div>
+  <div class="row">📍 Khu: <b>Việt Nam City</b></div>
+  <div class="row">🌤️ Trời: <b id="weather">Nắng nhẹ</b></div>
+  <div class="row">🕒 Giờ: <b id="clock">08:00</b></div>
+  <div class="row">🎯 Nhiệm vụ: <b id="mission">Nhận đơn giao hàng</b></div>
+</div>
+<div class="panel">
+  <h2>Điều khiển & tính năng</h2>
+  <div class="row">PC: Giữ chuột trái để chạy. WASD cũng dùng được.</div>
+  <div class="row">Mobile: Kéo joystick bằng ngón tay.</div>
+  <button class="btn" onclick="toggleBike()">Lên/Xuống xe máy</button>
+  <button class="btn buy" onclick="buyItem('Áo street',25000)">Mua áo 25K</button>
+  <button class="btn buy" onclick="buyItem('Nón bảo hiểm',18000)">Mua nón 18K</button>
+  <button class="btn warn" onclick="newMission()">Nhận nhiệm vụ</button>
+  <button class="btn alt" onclick="resetSave()">Reset</button>
+  <div class="row" id="status" style="margin-top:8px;color:#ffd76a">Sẵn sàng.</div>
+</div>
+<div class="hint">Bản V15: city hư cấu Việt Nam, không cờ bạc, không dùng dữ liệu bản đồ có bản quyền.</div>
+<div id="joy"><div id="knob"></div></div>
+<div class="mini"><canvas id="minimap" width="160" height="160"></canvas></div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-const SAVE_KEY='b79_v7_state';
-let map, playerMarker, accuracyCircle, missionMarker, watchId=null, currentPos=null;
-let state=JSON.parse(localStorage.getItem(SAVE_KEY)||'{"money":0,"mission":null}');
-const vnCenter={lat:10.7769,lng:106.7009};
-const statusEl=document.getElementById('status'), moneyEl=document.getElementById('money'), missionEl=document.getElementById('mission');
-function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(state));renderHud()}
-function renderHud(){moneyEl.textContent=Number(state.money||0).toLocaleString('vi-VN');missionEl.textContent=state.mission?`Giao hàng: còn ${distanceText(currentPos,state.mission)}`:'Chưa có nhiệm vụ'}
-function distanceMeters(a,b){if(!a||!b)return 0;const R=6371e3, p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180,dp=(b.lat-a.lat)*Math.PI/180,dl=(b.lng-a.lng)*Math.PI/180;const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
-function distanceText(a,b){if(!a||!b)return '...';const d=distanceMeters(a,b);return d<1000?Math.round(d)+'m':(d/1000).toFixed(2)+'km'}
-function avatarHtml(){return `<div class="avatar"><div class="pulse"></div><div class="hair"></div><div class="head"></div><div class="face">• •</div><div class="body"></div><div class="leg1"></div><div class="leg2"></div></div>`}
-function npcHtml(){return `<div class="npc"></div>`}
-window.initMap=function(){
- map=new google.maps.Map(document.getElementById('map'),{center:vnCenter,zoom:17,mapTypeId:'roadmap',disableDefaultUI:false,gestureHandling:'greedy',tilt:45,heading:0,styles:[{featureType:'poi.business',stylers:[{visibility:'on'}]},{featureType:'road',elementType:'geometry',stylers:[{saturation:-20},{lightness:10}]}]});
- playerMarker=new google.maps.marker.AdvancedMarkerElement({map,position:vnCenter,title:'Bạn',content:htmlNode(avatarHtml())});
- statusEl.innerHTML='Bấm <b>Lấy vị trí của tôi</b> để vào bản đồ thật.';
- addDemoNpcs(vnCenter); renderHud();
- if(state.mission){createMissionMarker(state.mission)}
-};
-function htmlNode(html){const d=document.createElement('div');d.innerHTML=html;return d.firstChild}
-function addDemoNpcs(center){for(let i=0;i<6;i++){const p={lat:center.lat+(Math.random()-.5)*0.006,lng:center.lng+(Math.random()-.5)*0.006};new google.maps.marker.AdvancedMarkerElement({map,position:p,title:'NPC đường phố',content:htmlNode(npcHtml())})}}
-function locate(){
- if(!navigator.geolocation){statusEl.innerHTML='<span class="warn">Trình duyệt không hỗ trợ GPS.</span>';return}
- statusEl.textContent='Đang xin quyền vị trí...';
- if(watchId) navigator.geolocation.clearWatch(watchId);
- watchId=navigator.geolocation.watchPosition(pos=>{
-   currentPos={lat:pos.coords.latitude,lng:pos.coords.longitude};
-   playerMarker.position=currentPos; map.panTo(currentPos); if(map.getZoom()<17)map.setZoom(18);
-   if(!accuracyCircle){accuracyCircle=new google.maps.Circle({map,center:currentPos,radius:pos.coords.accuracy||20,strokeColor:'#22c55e',strokeOpacity:.7,strokeWeight:1,fillColor:'#22c55e',fillOpacity:.12})}
-   accuracyCircle.setCenter(currentPos); accuracyCircle.setRadius(pos.coords.accuracy||20);
-   statusEl.innerHTML=`Đã định vị: <b>${currentPos.lat.toFixed(5)}, ${currentPos.lng.toFixed(5)}</b>`;
-   checkMission(); renderHud();
- },err=>{statusEl.innerHTML='<span class="warn">Không lấy được vị trí. Hãy bật GPS và cho phép trình duyệt truy cập.</span>'},{enableHighAccuracy:true,maximumAge:3000,timeout:12000});
+let scene,camera,renderer,player,bike,clock3=new THREE.Clock(),mixer;
+let money=Number(localStorage.getItem("b79_money")||"50000");
+let onBike=false, speed=0, targetDir=new THREE.Vector3();
+let keys={}, mouseDown=false, mouseX=0, mouseY=0, game=document.getElementById("game");
+let missionTarget=null, missionReward=0, timeOfDay=8, weatherMode=0;
+const statusEl=document.getElementById("status");
+const moneyEl=document.getElementById("money");
+const minimap=document.getElementById("minimap").getContext("2d");
+
+function init(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x9bc8ff);
+  scene.fog=new THREE.Fog(0x9bc8ff,60,230);
+
+  camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,600);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.shadowMap.enabled=true;
+  game.appendChild(renderer.domElement);
+
+  const hemi=new THREE.HemisphereLight(0xffffff,0x31405a,1.25); scene.add(hemi);
+  const sun=new THREE.DirectionalLight(0xfff0c0,2.8); sun.position.set(45,80,35); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=90;sun.shadow.camera.bottom=-90; scene.add(sun);
+  window.sun=sun;
+
+  makeCity();
+  makePlayer();
+  makeBike();
+  makeNPCs();
+  newMission();
+  updateHud();
+
+  addEvents();
+  animate();
 }
-function newMission(){const base=currentPos||vnCenter;const angle=Math.random()*Math.PI*2, dist=250+Math.random()*650;const dLat=(Math.cos(angle)*dist)/111320;const dLng=(Math.sin(angle)*dist)/(111320*Math.cos(base.lat*Math.PI/180));state.mission={lat:base.lat+dLat,lng:base.lng+dLng,reward:15000+Math.floor(Math.random()*35000)};createMissionMarker(state.mission);save();statusEl.innerHTML=`Nhiệm vụ mới: giao hàng để nhận <b>${state.mission.reward.toLocaleString('vi-VN')} VND game</b>.`}
-function createMissionMarker(p){if(missionMarker)missionMarker.map=null;missionMarker=new google.maps.marker.AdvancedMarkerElement({map,position:p,title:'Điểm giao hàng',content:htmlNode(`<div class="pinLabel">📦 Giao hàng<br>+${Number(p.reward||20000).toLocaleString('vi-VN')} VND</div>`)})}
-function checkMission(){if(!state.mission||!currentPos)return;const d=distanceMeters(currentPos,state.mission);if(d<35){state.money+=state.mission.reward||20000;state.mission=null;if(missionMarker)missionMarker.map=null;missionMarker=null;save();statusEl.innerHTML='<b>Hoàn thành giao hàng!</b> Đã cộng tiền game.'}}
-document.getElementById('locBtn').onclick=locate;document.getElementById('missionBtn').onclick=newMission;document.getElementById('resetBtn').onclick=()=>{state={money:0,mission:null};localStorage.removeItem(SAVE_KEY);if(missionMarker)missionMarker.map=null;missionMarker=null;save()};
-renderHud();
+
+function texCanvas(type){
+  const c=document.createElement("canvas"); c.width=c.height=256; const x=c.getContext("2d");
+  if(type==="road"){x.fillStyle="#30343a";x.fillRect(0,0,256,256);x.strokeStyle="#444";for(let i=0;i<90;i++){x.globalAlpha=.2;x.beginPath();x.arc(Math.random()*256,Math.random()*256,Math.random()*6,0,7);x.stroke()}x.globalAlpha=1;x.strokeStyle="#f4d03f";x.lineWidth=6;x.setLineDash([30,24]);x.beginPath();x.moveTo(128,0);x.lineTo(128,256);x.stroke();}
+  if(type==="side"){x.fillStyle="#8b8f8f";x.fillRect(0,0,256,256);x.strokeStyle="#777";for(let i=0;i<256;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i,256);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(256,i);x.stroke();}}
+  if(type==="wall"){x.fillStyle="#d7c1a1";x.fillRect(0,0,256,256);for(let i=0;i<80;i++){x.fillStyle=`rgba(255,255,255,${Math.random()*.18})`;x.fillRect(Math.random()*256,Math.random()*256,20+Math.random()*40,6+Math.random()*18)}}
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(6,6); return t;
+}
+function mat(color,rough=1,metal=0){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});}
+
+function addBox(x,y,z,w,h,d,m,name){
+  const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); mesh.position.set(x,y+h/2,z); mesh.castShadow=true; mesh.receiveShadow=true; mesh.name=name||""; scene.add(mesh); return mesh;
+}
+function makeCity(){
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(360,360),new THREE.MeshStandardMaterial({color:0x5c8f48,roughness:1}));
+  ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+
+  const roadMat=new THREE.MeshStandardMaterial({map:texCanvas("road"),roughness:.85});
+  addBox(0,.01,0,18,.08,340,roadMat,"road");
+  addBox(0,.02,0,340,.08,18,roadMat,"road2");
+  addBox(75,.02,-40,16,.08,200,roadMat,"road3");
+  addBox(-80,.02,45,16,.08,170,roadMat,"road4");
+
+  const sideMat=new THREE.MeshStandardMaterial({map:texCanvas("side"),roughness:.9});
+  for(const x of [-15,15]) addBox(x,.04,0,8,.08,340,sideMat,"sidewalk");
+  for(const z of [-15,15]) addBox(0,.05,z,340,.08,8,sideMat,"sidewalk");
+
+  const wallMat=new THREE.MeshStandardMaterial({map:texCanvas("wall"),roughness:.75});
+  const colors=[0xffd2a6,0xaee0ff,0xf5f1d0,0xe9b5c9,0xb9e5b0,0xffffff,0xdac3ff];
+  let shops=["CÀ PHÊ B79","TẠP HÓA CÔ BA","PHỞ ĐÊM","SỬA XE MÁY","NHÀ TRỌ 79","BƯU CỤC","CHỢ VIỆT","TRÀ SỮA"];
+  let i=0;
+  for(let z=-145; z<=145; z+=28){
+    for(let side of [-1,1]){
+      let h=12+Math.random()*22, w=18+Math.random()*12, d=16+Math.random()*10;
+      let x=side*(35+Math.random()*22);
+      let b=addBox(x,0,z,w,h,d, new THREE.MeshStandardMaterial({color:colors[i%colors.length], roughness:.8}),"building");
+      addSign(x, h+1.4, z, shops[i%shops.length], side);
+      addWindows(x,z,w,h,d,side);
+      i++;
+    }
+  }
+  for(let x=-145; x<=145; x+=30){
+    for(let side of [-1,1]){
+      let h=10+Math.random()*20, w=18+Math.random()*12, d=16+Math.random()*10;
+      let z=side*(35+Math.random()*25);
+      addBox(x,0,z,w,h,d,new THREE.MeshStandardMaterial({color:colors[i%colors.length], roughness:.8}),"building");
+      addSign(x,h+1.2,z,shops[i%shops.length],0);
+      addWindows(x,z,w,h,d,0);
+      i++;
+    }
+  }
+  for(let n=0;n<80;n++) makeTree((Math.random()-.5)*320,(Math.random()-.5)*320);
+  for(let n=0;n<25;n++) makeStreetLight((Math.random()-.5)*300,(Math.random()-.5)*300);
+}
+function addSign(x,y,z,text,side){
+  const c=document.createElement("canvas"); c.width=512;c.height=128; const ctx=c.getContext("2d");
+  ctx.fillStyle="#e02424";ctx.fillRect(0,0,512,128);ctx.fillStyle="#ffd84d";ctx.font="bold 42px Arial";ctx.textAlign="center";ctx.fillText(text,256,78);
+  const t=new THREE.CanvasTexture(c); const m=new THREE.MeshBasicMaterial({map:t});
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(12,3),m);
+  mesh.position.set(x,y,z); mesh.rotation.y = side? (side>0?-Math.PI/2:Math.PI/2) : 0;
+  scene.add(mesh);
+}
+function addWindows(x,z,w,h,d,side){
+  const wm=mat(0x22334d,.3,.1);
+  for(let yy=4; yy<h-2; yy+=5){
+    for(let k=-1;k<=1;k++){
+      const win=new THREE.Mesh(new THREE.PlaneGeometry(2.5,2),wm);
+      win.position.set(x+(side? -side*(w/2+.03):k*4), yy, z+(side?k*4: -d/2-.03));
+      win.rotation.y=side? side*Math.PI/2:0;
+      scene.add(win);
+    }
+  }
+}
+function makeTree(x,z){
+  if(Math.abs(x)<22 || Math.abs(z)<22) return;
+  addBox(x,0,z,1.2,5,1.2,mat(0x6b3f1f),"tree");
+  const crown=new THREE.Mesh(new THREE.SphereGeometry(4,12,10),mat(0x1d8f3a));
+  crown.position.set(x,7,z); crown.castShadow=true; scene.add(crown);
+}
+function makeStreetLight(x,z){
+  if(Math.abs(x)<12 || Math.abs(z)<12) return;
+  addBox(x,0,z,.35,7,.35,mat(0x333333,.45,.2));
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.9,12,8),new THREE.MeshBasicMaterial({color:0xffed9b}));
+  lamp.position.set(x,7.5,z); scene.add(lamp);
+  const l=new THREE.PointLight(0xffd690,.8,18); l.position.copy(lamp.position); scene.add(l);
+}
+function makePlayer(){
+  player=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.CapsuleGeometry(1.1,2.2,8,16),mat(0x1d7cff,.65,.05)); body.position.y=2.5; body.castShadow=true; player.add(body);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.78,18,14),mat(0xf0bd8b,.8)); head.position.y=4.3; head.castShadow=true; player.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(.82,16,8,0,Math.PI*2,0,Math.PI/2),mat(0x151515)); hair.position.y=4.75; player.add(hair);
+  const legM=mat(0x1a1d24); const armM=mat(0xf0bd8b);
+  for(let s of [-1,1]){let leg=addLimb(.45*s,1.05,0,0.38,1.8,0.38,legM);player.add(leg); let arm=addLimb(1.05*s,2.7,0,0.32,1.7,0.32,armM);player.add(arm)}
+  player.position.set(0,0,0); scene.add(player);
+}
+function addLimb(x,y,z,w,h,d,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;return o}
+function makeBike(){
+  bike=new THREE.Group();
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(3,.6,1),mat(0xe22b2b,.5,.2));frame.position.y=1.1;frame.castShadow=true;bike.add(frame);
+  for(let x of [-1.2,1.2]){let wh=new THREE.Mesh(new THREE.TorusGeometry(.55,.16,10,22),mat(0x111111,.5,.5));wh.rotation.y=Math.PI/2;wh.position.set(x,.55,0);wh.castShadow=true;bike.add(wh)}
+  let seat=new THREE.Mesh(new THREE.BoxGeometry(1.1,.25,.75),mat(0x111111));seat.position.set(.25,1.55,0);bike.add(seat);
+  bike.position.set(4,0,3); scene.add(bike);
+}
+function makeNPCs(){
+  const npcM=[0xffaa00,0x44ccff,0xff66aa,0x66ff88];
+  for(let i=0;i<22;i++){
+    let g=new THREE.Group(); let b=new THREE.Mesh(new THREE.CapsuleGeometry(.7,1.6,6,10),mat(npcM[i%npcM.length]));b.position.y=1.7;b.castShadow=true;g.add(b);
+    let h=new THREE.Mesh(new THREE.SphereGeometry(.48,10,8),mat(0xe7b17a));h.position.y=3;g.add(h);
+    g.position.set((Math.random()-.5)*150,0,(Math.random()-.5)*150); g.userData={dir:new THREE.Vector3(Math.random()-.5,0,Math.random()-.5).normalize(),t:Math.random()*10}; scene.add(g);
+  }
+  for(let i=0;i<16;i++) makeTrafficCar(i);
+}
+function makeTrafficCar(i){
+  let car=new THREE.Group();
+  car.add(new THREE.Mesh(new THREE.BoxGeometry(4.2,1.3,2.1),mat([0xeeeeee,0x0066ff,0xff3333,0x111111][i%4],.5,.3)));
+  car.children[0].position.y=1; car.userData={road:i%2,dir:i%4<2?1:-1,spd:.08+Math.random()*.06};
+  car.position.set(i%2? (i*17%160-80):0,0,i%2?0:(i*21%220-110));
+  scene.add(car);
+}
+function toggleBike(){
+  if(player.position.distanceTo(bike.position)<8 || onBike){onBike=!onBike;statusEl.textContent=onBike?"Đã lên xe máy. Tốc độ tăng.":"Đã xuống xe máy."; if(onBike) bike.visible=false; else {bike.visible=true; bike.position.copy(player.position).add(new THREE.Vector3(2,0,1));}}
+  else statusEl.textContent="Đến gần xe máy để lên xe.";
+}
+function buyItem(name,price){
+  if(money>=price){money-=price; save(); statusEl.textContent="Đã mua "+name+"."; updateHud();}
+  else statusEl.textContent="Không đủ tiền.";
+}
+function resetSave(){localStorage.removeItem("b79_money"); money=50000; save(); updateHud(); statusEl.textContent="Đã reset ví."}
+function newMission(){
+  const pts=[new THREE.Vector3(80,0,80),new THREE.Vector3(-90,0,70),new THREE.Vector3(120,0,-75),new THREE.Vector3(-70,0,-120),new THREE.Vector3(30,0,-140)];
+  missionTarget=pts[Math.floor(Math.random()*pts.length)]; missionReward=25000+Math.floor(Math.random()*40000);
+  document.getElementById("mission").textContent="Giao hàng đến điểm vàng";
+  if(window.missionMesh) scene.remove(window.missionMesh);
+  window.missionMesh=new THREE.Mesh(new THREE.CylinderGeometry(4,4,.4,24),new THREE.MeshBasicMaterial({color:0xffd700}));
+  window.missionMesh.position.copy(missionTarget); window.missionMesh.position.y=.25; scene.add(window.missionMesh);
+  statusEl.textContent="Nhiệm vụ mới: giao hàng nhận "+missionReward.toLocaleString("vi-VN")+" VND.";
+}
+function completeMission(){
+  money+=missionReward; save(); updateHud(); statusEl.textContent="Hoàn thành nhiệm vụ! +"+missionReward.toLocaleString("vi-VN")+" VND"; newMission();
+}
+function save(){localStorage.setItem("b79_money",String(money))}
+function updateHud(){moneyEl.textContent=money.toLocaleString("vi-VN")}
+function addEvents(){
+  addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+  addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true); addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+  renderer.domElement.addEventListener("pointerdown",e=>{mouseDown=true; mouseX=e.clientX; mouseY=e.clientY});
+  addEventListener("pointerup",()=>mouseDown=false); addEventListener("pointermove",e=>{mouseX=e.clientX; mouseY=e.clientY});
+  const joy=document.getElementById("joy"), knob=document.getElementById("knob");
+  joy.addEventListener("touchmove",e=>{e.preventDefault(); const r=joy.getBoundingClientRect(); const t=e.touches[0]; let dx=t.clientX-(r.left+64), dy=t.clientY-(r.top+64); let len=Math.min(54,Math.hypot(dx,dy)); let ang=Math.atan2(dy,dx); knob.style.left=(44+Math.cos(ang)*len)+"px"; knob.style.top=(44+Math.sin(ang)*len)+"px"; targetDir.set(Math.cos(ang),0,Math.sin(ang)); speed=len/54;},{passive:false});
+  joy.addEventListener("touchend",()=>{knob.style.left="44px";knob.style.top="44px";speed=0;targetDir.set(0,0,0)});
+}
+function input(){
+  let dir=new THREE.Vector3();
+  if(keys.w) dir.z-=1;if(keys.s) dir.z+=1;if(keys.a) dir.x-=1;if(keys.d) dir.x+=1;
+  if(mouseDown && innerWidth>760){let dx=mouseX-innerWidth/2, dy=mouseY-innerHeight/2; dir.set(dx,0,dy);}
+  if(dir.length()>0){dir.normalize(); targetDir.copy(dir); speed=1}
+  else if(innerWidth>760){speed=0}
+}
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock3.getDelta(),.033);
+  input();
+  const maxSp=onBike?34:13;
+  if(speed>0){
+    const camYaw=Math.atan2(camera.position.x-player.position.x,camera.position.z-player.position.z);
+    const move=targetDir.clone();
+    const sin=Math.sin(camYaw), cos=Math.cos(camYaw);
+    const wx=move.x*cos - move.z*sin, wz=move.x*sin + move.z*cos;
+    const v=new THREE.Vector3(wx,0,wz).normalize();
+    player.position.addScaledVector(v,maxSp*dt*speed);
+    player.rotation.y=Math.atan2(v.x,v.z);
+  }
+  player.position.x=Math.max(-170,Math.min(170,player.position.x)); player.position.z=Math.max(-170,Math.min(170,player.position.z));
+  if(missionTarget && player.position.distanceTo(missionTarget)<6) completeMission();
+
+  scene.children.forEach(o=>{
+    if(o.userData && o.userData.dir){o.userData.t-=dt;if(o.userData.t<0){o.userData.dir.set(Math.random()-.5,0,Math.random()-.5).normalize();o.userData.t=2+Math.random()*4}o.position.addScaledVector(o.userData.dir,dt*2);o.rotation.y=Math.atan2(o.userData.dir.x,o.userData.dir.z)}
+    if(o.userData && o.userData.road!==undefined){ if(o.userData.road){o.position.x+=o.userData.spd*o.userData.dir*60*dt;if(Math.abs(o.position.x)>175)o.userData.dir*=-1}else{o.position.z+=o.userData.spd*o.userData.dir*60*dt;if(Math.abs(o.position.z)>175)o.userData.dir*=-1}}
+  });
+  timeOfDay=(timeOfDay+dt*.03)%24; document.getElementById("clock").textContent=String(Math.floor(timeOfDay)).padStart(2,"0")+":"+String(Math.floor((timeOfDay%1)*60)).padStart(2,"0");
+  const night=timeOfDay<6||timeOfDay>18; scene.background.set(night?0x081020:0x9bc8ff); scene.fog.color.set(night?0x081020:0x9bc8ff); window.sun.intensity=night?.7:2.8;
+  cameraFollow(dt); drawMini(); renderer.render(scene,camera);
+}
+function cameraFollow(dt){
+  const back=new THREE.Vector3(Math.sin(player.rotation.y)*-18,10,Math.cos(player.rotation.y)*-18);
+  const desired=player.position.clone().add(back).add(new THREE.Vector3(0,onBike?4:2,0));
+  camera.position.lerp(desired,.08);
+  camera.lookAt(player.position.x,player.position.y+2.5,player.position.z);
+}
+function drawMini(){
+  minimap.clearRect(0,0,160,160); minimap.fillStyle="rgba(10,20,30,.55)";minimap.fillRect(0,0,160,160);
+  minimap.strokeStyle="#555"; minimap.lineWidth=10; minimap.beginPath(); minimap.moveTo(80,0);minimap.lineTo(80,160);minimap.moveTo(0,80);minimap.lineTo(160,80);minimap.stroke();
+  function p(v){return [80+v.x/2.2,80+v.z/2.2]}
+  minimap.fillStyle="#00e5ff"; let pp=p(player.position); minimap.beginPath();minimap.arc(pp[0],pp[1],5,0,7);minimap.fill();
+  if(missionTarget){minimap.fillStyle="#ffd700";let mt=p(missionTarget);minimap.beginPath();minimap.arc(mt[0],mt[1],5,0,7);minimap.fill();}
+}
+init();
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap&libraries=marker&v=weekly"></script>
 </body>
 </html>
